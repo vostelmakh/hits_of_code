@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Vostelmakh\HitsOfCode;
 
-use DateTime;
-
 class Git
 {
     public function __construct(
-        private $dir,
-        private $exclude,
-        private $author,
-        private $since,
-        private $before
+        private string $dir,
+        private array $exclude,
+        private string $author,
+        private string $since,
+        private string $before
     ) {
     }
 
@@ -43,9 +41,9 @@ class Git
             $parts = explode("\t", $line);
 
             $additions = (int) $parts[0];
-            $deletions = intval($parts[1]);
+            $deletions = (int) $parts[1];
 
-            $hits[] = new Hits(new DateTime(), $additions + $deletions);
+            $hits[] = new Hits($additions + $deletions);
         }
 
         return $hits;
