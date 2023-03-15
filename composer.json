@@ -1,0 +1,23 @@
+{
+    "name": "vostelmakh/hits_of_code",
+    "description": "Tool to get hits of your code",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Vostelmakh\\HitsOfCode\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Vlad Stelmakh",
+            "email": "vlad1k9369@gmail.com"
+        }
+    ],
+    "require": {
+        "minicli/minicli": "^3.2"
+    },
+    "bin": [
+        "bin/hoc"
+    ]
+}

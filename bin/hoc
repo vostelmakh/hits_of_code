@@ -1,0 +1,86 @@
+#!/usr/bin/php
+<?php
+
+if (php_sapi_name() !== 'cli') {
+    exit;
+}
+
+$root_app = dirname(__DIR__);
+
+if (!is_file($root_app . '/vendor/autoload.php')) {
+    $root_app = dirname(__DIR__, 4);
+}
+
+require $root_app . '/vendor/autoload.php';
+
+use Minicli\App;
+use Minicli\Command\CommandCall;
+use Vostelmakh\HitsOfCode\Base;
+
+$app = new App();
+$input = new CommandCall($argv);
+
+$app->registerCommand('help', function() use ($app) {
+    $app->getPrinter()->info(
+            'Hoc cli command options:' . PHP_EOL .
+            '--help     Show brief intro' . PHP_EOL .
+            '--format   Output format (text|xml|json|int)' . PHP_EOL .
+            '--exclude  Glob pattern to exclude files/dirs, e.g. "vendor/**"' . PHP_EOL .
+            '--author   Filter results by given author' . PHP_EOL .
+            '--dir      Directory to scan' . PHP_EOL .
+            '--since    Set the start date of hoc (YYYY-MM-DD)' . PHP_EOL .
+            '--before   Set the end date of hoc (YYYY-MM-DD)")' . PHP_EOL
+    );
+});
+
+$app->registerCommand('count', function() use ($app, $input) {
+    if ($input->hasParam('--dir')) {
+        $dir = $input->getParam('--dir');
+    } else {
+        $app->getPrinter()->error("Argument 'dir' is required");
+        return 1;
+    }
+
+    if ($input->hasParam('--author')) {
+        $author = $input->getParam('--author');
+    }
+
+    if ($input->hasParam('--format')) {
+        $format = $input->getParam('--format');
+    }
+
+    $exclude = [];
+    if ($input->hasParam('--exclude')) {
+        $args = $input->getRawArgs();
+        foreach ($args as $arg) {
+            if (str_contains($arg, '--exclude=')) {
+                [$_, $argument] = explode('=', $arg);
+
+                $exclude[] = $argument;
+            }
+        }
+    }
+
+    if ($input->hasParam('--since')) {
+        $since = $input->getParam('--since');
+    }
+
+    if ($input->hasParam('--before')) {
+        $before = $input->getParam('--before');
+    }
+
+    $base = new Base(
+            $dir,
+        $exclude ?? [],
+        $author ?? '',
+        $format ?? 'int',
+        $since ?? '2000-01-01',
+        $before ?? date('Y-m-d')
+    );
+
+    $app->getPrinter()->info($base->report());
+
+    return 0;
+});
+
+$app->runCommand($input->getRawArgs());
